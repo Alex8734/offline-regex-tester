@@ -7,6 +7,13 @@
 
              MinWidth="320"
              Background="#1a1b2e">
+    <UserControl.Styles>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="Black" />
+        </Style>
+
+    </UserControl.Styles>
     <UserControl.Resources>
         <vm:CategoryActiveBackgroundConverter x:Key="CategoryActiveBackgroundConverter" />
         <vm:CategoryActiveForegroundConverter x:Key="CategoryActiveForegroundConverter" />
@@ -37,6 +44,7 @@
                 <ListBox ItemsSource="{Binding Categories}"
                          SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
                          Background="Transparent"
+
                          BorderThickness="0">
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
@@ -48,6 +56,7 @@
                         </Style>
                         <Style Selector="ListBoxItem:selected">
                             <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0"/>
                             <Setter Property="BorderBrush" Value="Transparent" />
                         </Style>
                     </ListBox.Styles>
@@ -115,7 +124,9 @@
                                                    Foreground="#f8f8f2"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
-                                                   TextWrapping="Wrap" />
+                                                   TextWrapping="NoWrap"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxLines="1" />
                                         <Border Grid.Column="1"
                                                 Grid.RowSpan="2"
                                                 Margin="8,0,0,0"
@@ -126,7 +137,10 @@
                                             <TextBlock Text="{Binding Syntax}"
                                                        Foreground="#50fa7b"
                                                        FontFamily="Cascadia Code,Fira Code,Consolas,monospace"
-                                                       FontSize="12" />
+                                                       FontSize="12"
+                                                       TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxLines="1" />
                                         </Border>
                                         <TextBlock Grid.Column="0"
                                                    Grid.Row="1"
@@ -134,7 +148,9 @@
                                                    Text="{Binding Tooltip}"
                                                    Foreground="#6272a4"
                                                    FontSize="10"
-                                                   TextWrapping="Wrap" />
+                                                   TextWrapping="NoWrap"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxLines="1" />
                                     </Grid>
                                 </Border>
                             </Button>
