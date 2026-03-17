@@ -51,6 +51,13 @@
             <Setter Property="BorderBrush" Value="#bd93f9" />
         </Style>
 
+        <Style Selector="PathIcon.sidebarToggleIcon">
+            <Setter Property="Foreground" Value="#6272a4" />
+        </Style>
+        <Style Selector="ToggleButton.flag:checked PathIcon.sidebarToggleIcon">
+            <Setter Property="Foreground" Value="#bd93f9" />
+        </Style>
+
         <Style Selector="TextBox.mono">
             <Setter Property="FontFamily" Value="Cascadia Code,Fira Code,Consolas,monospace" />
             <Setter Property="FontSize" Value="14" />
@@ -123,20 +130,52 @@
             </StackPanel>
         </Border>
 
-        <Grid Grid.Row="1" ColumnDefinitions="*,5,*,5,*">
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
 
             <!-- LEFT: Regex Toolbox -->
-            <views:RegexToolbox Grid.Column="0"
-                               Background="#1a1b2e" />
+            <Border Grid.Column="0"
+                    Width="320"
+                    IsVisible="{Binding IsLeftSidebarOpen}">
+                <views:RegexToolbox Background="#1a1b2e" />
+            </Border>
 
             <GridSplitter Grid.Column="1"
+                          IsVisible="{Binding IsLeftSidebarOpen}"
+                          Width="5"
                           ResizeDirection="Columns"
                           Background="#44475a" />
 
             <!-- MIDDLE: Test String Editor -->
             <Grid Grid.Column="2" RowDefinitions="Auto,*">
                 <Border Grid.Row="0" Background="#1e1f2e" Padding="12,6">
-                    <TextBlock Text="TEST STRING" Classes="label" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                        <ToggleButton Grid.Column="0"
+                                      Classes="flag"
+                                      Width="26"
+                                      Height="22"
+                                      IsChecked="{Binding IsLeftSidebarOpen}"
+                                      ToolTip.Tip="Regex Toolbox links ein-/ausklappen">
+                            <PathIcon Classes="sidebarToggleIcon"
+                                      Data="{StaticResource ToolboxIconGeom}"
+                                      Width="14"
+                                      Height="14" />
+                        </ToggleButton>
+                        <TextBlock Grid.Column="1"
+                                   Text="TEST STRING"
+                                   Classes="label"
+                                   HorizontalAlignment="Center" />
+                        <ToggleButton Grid.Column="2"
+                                      Classes="flag"
+                                      Width="26"
+                                      Height="22"
+                                      IsChecked="{Binding IsRightSidebarOpen}"
+                                      ToolTip.Tip="Match Information rechts ein-/ausklappen">
+                            <PathIcon Classes="sidebarToggleIcon"
+                                      Data="{StaticResource MatchResultsIconGeom}"
+                                      Width="14"
+                                      Height="14" />
+                        </ToggleButton>
+                    </Grid>
                 </Border>
                 <TextBox Grid.Row="1"
                          Classes="mono"
@@ -154,11 +193,16 @@
             </Grid>
 
             <GridSplitter Grid.Column="3"
+                          IsVisible="{Binding IsRightSidebarOpen}"
+                          Width="5"
                           ResizeDirection="Columns"
                           Background="#44475a" />
 
             <!-- RIGHT: Match Information -->
-            <Grid Grid.Column="4" RowDefinitions="Auto,*">
+            <Grid Grid.Column="4"
+                  Width="360"
+                  IsVisible="{Binding IsRightSidebarOpen}"
+                  RowDefinitions="Auto,*">
                 <Border Grid.Row="0" Background="#1e1f2e" Padding="12,6">
                     <TextBlock Text="MATCH INFORMATION" Classes="label" />
                 </Border>

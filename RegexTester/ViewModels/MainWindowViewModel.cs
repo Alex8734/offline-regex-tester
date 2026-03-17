@@ -29,6 +29,12 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isExplaining;
 
     [ObservableProperty]
+    private bool _isLeftSidebarOpen = true;
+
+    [ObservableProperty]
+    private bool _isRightSidebarOpen = true;
+
+    [ObservableProperty]
     private string _matchSummary = "";
 
     [ObservableProperty]
