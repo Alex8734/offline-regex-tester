@@ -11,44 +11,62 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private CancellationTokenSource? _explainCts;
 
-    [ObservableProperty] private string? _explanationError;
+    [ObservableProperty]
+    private string? _explanationError;
 
-    [ObservableProperty] private bool _hasError;
+    [ObservableProperty]
+    private bool _hasError;
 
-    [ObservableProperty] private bool _hasExplanation;
+    [ObservableProperty]
+    private bool _hasExplanation;
 
-    [ObservableProperty] private bool _ignoreCase;
+    [ObservableProperty]
+    private bool _ignoreCase;
 
-    [ObservableProperty] private bool _ignorePatternWhitespace;
+    [ObservableProperty]
+    private bool _ignorePatternWhitespace;
 
-    [ObservableProperty] private bool _isExplaining;
+    [ObservableProperty]
+    private bool _isExplaining;
 
-    [ObservableProperty] private bool _isLeftSidebarOpen = true;
+    [ObservableProperty]
+    private bool _isLeftSidebarOpen = true;
 
-    [ObservableProperty] private bool _isRightSidebarOpen = true;
+    [ObservableProperty]
+    private bool _isRightSidebarOpen = true;
 
     private double _lastLeftSidebarWidth = 320;
     private double _lastRightSidebarWidth = 360;
 
-    [ObservableProperty] private GridLength _leftSidebarColumnWidth = new(320, GridUnitType.Pixel);
+    [ObservableProperty]
+    private GridLength _leftSidebarColumnWidth = new(320, GridUnitType.Pixel);
 
-    [ObservableProperty] private GridLength _leftSplitterColumnWidth = new(5, GridUnitType.Pixel);
+    [ObservableProperty]
+    private GridLength _leftSplitterColumnWidth = new(5, GridUnitType.Pixel);
 
-    [ObservableProperty] private string _matchSummary = "";
+    [ObservableProperty]
+    private string _matchSummary = "";
 
-    [ObservableProperty] private bool _multiline;
+    [ObservableProperty]
+    private bool _multiline;
 
-    [ObservableProperty] private string _pattern = @"(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})";
+    [ObservableProperty]
+    private string _pattern = @"(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})";
 
-    [ObservableProperty] private string? _regexError;
+    [ObservableProperty]
+    private string? _regexError;
 
-    [ObservableProperty] private GridLength _rightSidebarColumnWidth = new(360, GridUnitType.Pixel);
+    [ObservableProperty]
+    private GridLength _rightSidebarColumnWidth = new(360, GridUnitType.Pixel);
 
-    [ObservableProperty] private GridLength _rightSplitterColumnWidth = new(5, GridUnitType.Pixel);
+    [ObservableProperty]
+    private GridLength _rightSplitterColumnWidth = new(5, GridUnitType.Pixel);
 
-    [ObservableProperty] private bool _singleline;
+    [ObservableProperty]
+    private bool _singleline;
 
-    [ObservableProperty] private string _testString =
+    [ObservableProperty]
+    private string _testString =
         "2024-03-09\nhello world\n1999-12-31\nnot-a-date\n2026-01-15\n12-3-456 (wrong format)";
 
     public MainWindowViewModel()
@@ -101,6 +119,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             LeftSidebarColumnWidth = new GridLength(_lastLeftSidebarWidth, GridUnitType.Pixel);
             LeftSplitterColumnWidth = new GridLength(5, GridUnitType.Pixel);
+
             return;
         }
 
@@ -114,6 +133,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             RightSidebarColumnWidth = new GridLength(_lastRightSidebarWidth, GridUnitType.Pixel);
             RightSplitterColumnWidth = new GridLength(5, GridUnitType.Pixel);
+
             return;
         }
 
@@ -123,12 +143,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnLeftSidebarColumnWidthChanged(GridLength value)
     {
-        if (IsLeftSidebarOpen && value.IsAbsolute && value.Value > 0) _lastLeftSidebarWidth = value.Value;
+        if (IsLeftSidebarOpen && value.IsAbsolute && value.Value > 0)
+        {
+            _lastLeftSidebarWidth = value.Value;
+        }
     }
 
     partial void OnRightSidebarColumnWidthChanged(GridLength value)
     {
-        if (IsRightSidebarOpen && value.IsAbsolute && value.Value > 0) _lastRightSidebarWidth = value.Value;
+        if (IsRightSidebarOpen && value.IsAbsolute && value.Value > 0)
+        {
+            _lastRightSidebarWidth = value.Value;
+        }
     }
 
     private void UpdateMatches()
@@ -138,7 +164,10 @@ public partial class MainWindowViewModel : ViewModelBase
         HasError = false;
         MatchSummary = "";
 
-        if (string.IsNullOrEmpty(Pattern)) return;
+        if (string.IsNullOrEmpty(Pattern))
+        {
+            return;
+        }
 
         Regex regex;
         try
@@ -153,15 +182,15 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        var groupNames = regex.GetGroupNames();
-        var rawLines = (TestString ?? "").Split('\n');
+        string[] groupNames = regex.GetGroupNames();
+        string[] rawLines = (TestString ?? "").Split('\n');
 
         var totalMatches = 0;
         var matchedLines = 0;
 
         for (var i = 0; i < rawLines.Length; i++)
         {
-            var line = rawLines[i].TrimEnd('\r');
+            string line = rawLines[i].TrimEnd('\r');
             MatchCollection matches;
             try
             {
@@ -191,7 +220,10 @@ public partial class MainWindowViewModel : ViewModelBase
                 totalMatches++;
             }
 
-            if (matchList.Count > 0) matchedLines++;
+            if (matchList.Count > 0)
+            {
+                matchedLines++;
+            }
 
             LineResults.Add(new LineResult
             {
@@ -201,13 +233,13 @@ public partial class MainWindowViewModel : ViewModelBase
             });
         }
 
-        var lines = rawLines.Length;
+        int lines = rawLines.Length;
         MatchSummary = totalMatches switch
-        {
-            0 => "No matches found",
-            1 => $"1 match in {matchedLines}/{lines} line{(lines == 1 ? "" : "s")}",
-            _ => $"{totalMatches} matches in {matchedLines}/{lines} line{(lines == 1 ? "" : "s")}"
-        };
+                       {
+                           0 => "No matches found",
+                           1 => $"1 match in {matchedLines}/{lines} line{(lines == 1 ? "" : "s")}",
+                           _ => $"{totalMatches} matches in {matchedLines}/{lines} line{(lines == 1 ? "" : "s")}"
+                       };
     }
 
     private void ScheduleExplain()
@@ -220,7 +252,10 @@ public partial class MainWindowViewModel : ViewModelBase
         HasExplanation = false;
         ExplanationError = null;
 
-        if (string.IsNullOrEmpty(Pattern) || HasError) return;
+        if (string.IsNullOrEmpty(Pattern) || HasError)
+        {
+            return;
+        }
 
         _ = RunExplainAfterDelayAsync(token);
     }
@@ -232,9 +267,7 @@ public partial class MainWindowViewModel : ViewModelBase
             await Task.Delay(800, ct);
             await RunExplainAsync(ct);
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
     }
 
     [RelayCommand]
@@ -246,7 +279,10 @@ public partial class MainWindowViewModel : ViewModelBase
         HasExplanation = false;
         ExplanationError = null;
 
-        if (string.IsNullOrEmpty(Pattern) || HasError) return;
+        if (string.IsNullOrEmpty(Pattern) || HasError)
+        {
+            return;
+        }
 
         await RunExplainAsync(_explainCts.Token);
     }
@@ -257,12 +293,18 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             var result = await RegexExplainer.ExplainAsync(Pattern, BuildOptions(), ct);
-            if (ct.IsCancellationRequested) return;
+            if (ct.IsCancellationRequested)
+            {
+                return;
+            }
 
             ExplanationLines.Clear();
             if (result.IsOk)
             {
-                foreach (var line in result.Lines) ExplanationLines.Add(line);
+                foreach (var line in result.Lines)
+                {
+                    ExplanationLines.Add(line);
+                }
 
                 HasExplanation = result.Lines.Count > 0;
                 ExplanationError = HasExplanation ? null : "No explanation available for this pattern.";
@@ -273,12 +315,13 @@ public partial class MainWindowViewModel : ViewModelBase
                 ExplanationError = result.ErrorMessage;
             }
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            if (!ct.IsCancellationRequested) ExplanationError = $"Error: {ex.Message}";
+            if (!ct.IsCancellationRequested)
+            {
+                ExplanationError = $"Error: {ex.Message}";
+            }
         }
         finally
         {
@@ -289,13 +332,25 @@ public partial class MainWindowViewModel : ViewModelBase
     private RegexOptions BuildOptions()
     {
         var opts = RegexOptions.None;
-        if (IgnoreCase) opts |= RegexOptions.IgnoreCase;
+        if (IgnoreCase)
+        {
+            opts |= RegexOptions.IgnoreCase;
+        }
 
-        if (Multiline) opts |= RegexOptions.Multiline;
+        if (Multiline)
+        {
+            opts |= RegexOptions.Multiline;
+        }
 
-        if (Singleline) opts |= RegexOptions.Singleline;
+        if (Singleline)
+        {
+            opts |= RegexOptions.Singleline;
+        }
 
-        if (IgnorePatternWhitespace) opts |= RegexOptions.IgnorePatternWhitespace;
+        if (IgnorePatternWhitespace)
+        {
+            opts |= RegexOptions.IgnorePatternWhitespace;
+        }
 
         return opts;
     }

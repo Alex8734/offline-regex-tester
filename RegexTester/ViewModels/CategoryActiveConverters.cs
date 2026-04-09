@@ -15,30 +15,22 @@ internal static class CategoryActiveBrushes
 
 public class CategoryActiveBackgroundConverter : IValueConverter
 {
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value is bool and true
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is bool and true
             ? CategoryActiveBrushes.ActiveBackground
             : CategoryActiveBrushes.InactiveBackground;
-    }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotImplementedException();
-    }
 }
 
 public class CategoryActiveForegroundConverter : IValueConverter
 {
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value is bool and true
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is bool and true
             ? CategoryActiveBrushes.ActiveForeground
             : CategoryActiveBrushes.InactiveForeground;
-    }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotImplementedException();
-    }
 }

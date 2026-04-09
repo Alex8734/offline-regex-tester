@@ -33,7 +33,7 @@ public static class RegexExplainer
                 EnsureScratchProject();
                 WriteSourceFile(pattern, options);
 
-                var (exitCode, buildOutput) = await RunBuildAsync(ct);
+                (int exitCode, string buildOutput) = await RunBuildAsync(ct);
                 if (ct.IsCancellationRequested)
                 {
                     throw new OperationCanceledException(ct);
@@ -44,7 +44,7 @@ public static class RegexExplainer
                     return ExplanationResult.BuildFailed(buildOutput);
                 }
 
-                var lines = ParseGeneratedFile();
+                List<ExplanationLine> lines = ParseGeneratedFile();
 
                 return lines.Count > 0
                     ? ExplanationResult.Ok(lines)
@@ -68,7 +68,7 @@ public static class RegexExplainer
     private static void EnsureScratchProject()
     {
         Directory.CreateDirectory(scratchDir);
-        var csproj = Path.Combine(scratchDir, "Scratch.csproj");
+        string csproj = Path.Combine(scratchDir, "Scratch.csproj");
         if (File.Exists(csproj))
         {
             return;
@@ -89,7 +89,7 @@ public static class RegexExplainer
     private static void WriteSourceFile(string pattern, RegexOptions options)
     {
         // Escape for verbatim C# string: double any embedded double-quotes.
-        var escaped = pattern.Replace("\"", "\"\"");
+        string escaped = pattern.Replace("\"", "\"\"");
 
         var optParts = new List<string>();
         if (options.HasFlag(RegexOptions.IgnoreCase))
@@ -117,7 +117,7 @@ public static class RegexExplainer
             optParts.Add("RegexOptions.ExplicitCapture");
         }
 
-        var optArg = optParts.Count > 0
+        string optArg = optParts.Count > 0
             ? $", {string.Join(" | ", optParts)}"
             : "";
 
@@ -137,12 +137,12 @@ public static class RegexExplainer
     private static async Task<(int exitCode, string output)> RunBuildAsync(CancellationToken ct)
     {
         var result = await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--nologo", "-v", "quiet"])
-            .WithWorkingDirectory(scratchDir)
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync(ct);
+                              .WithArguments(["build", "--nologo", "-v", "quiet"])
+                              .WithWorkingDirectory(scratchDir)
+                              .WithValidation(CommandResultValidation.None)
+                              .ExecuteBufferedAsync(ct);
 
-        var combined = (result.StandardOutput + "\n" + result.StandardError).Trim();
+        string combined = (result.StandardOutput + "\n" + result.StandardError).Trim();
 
         return (result.ExitCode, combined);
     }
@@ -167,21 +167,21 @@ public static class RegexExplainer
         //     System.Text.RegularExpressions.Generator/
         //       System.Text.RegularExpressions.Generator.RegexGenerator/
         //         RegexGenerator.g.cs
-        var generatedDir = Path.Combine(scratchDir, "obj", "Debug", "net10.0", "generated",
-            "System.Text.RegularExpressions.Generator",
-            "System.Text.RegularExpressions.Generator.RegexGenerator");
+        string generatedDir = Path.Combine(scratchDir, "obj", "Debug", "net10.0", "generated",
+                                           "System.Text.RegularExpressions.Generator",
+                                           "System.Text.RegularExpressions.Generator.RegexGenerator");
 
-        var generatedFile = Path.Combine(generatedDir, "RegexGenerator.g.cs");
+        string generatedFile = Path.Combine(generatedDir, "RegexGenerator.g.cs");
 
         if (!File.Exists(generatedFile))
         {
             // Fallback: glob for any .g.cs that isn't the global usings file
-            var found = Directory.GetFiles(Path.Combine(scratchDir, "obj"),
-                "*.g.cs",
-                SearchOption.AllDirectories);
+            string[] found = Directory.GetFiles(Path.Combine(scratchDir, "obj"),
+                                                "*.g.cs",
+                                                SearchOption.AllDirectories);
 
             generatedFile = Array.Find(found,
-                                f => !f.EndsWith("GlobalUsings.g.cs", StringComparison.OrdinalIgnoreCase))
+                                       f => !f.EndsWith("GlobalUsings.g.cs", StringComparison.OrdinalIgnoreCase))
                             ?? string.Empty;
         }
 
@@ -200,7 +200,7 @@ public static class RegexExplainer
 
         for (var i = 0; i < lines.Length; i++)
         {
-            var raw = lines[i].TrimStart();
+            string raw = lines[i].TrimStart();
 
             // Only look inside XML doc comment lines
             if (!raw.StartsWith("///"))
@@ -209,7 +209,7 @@ public static class RegexExplainer
             }
 
             // Strip the "/// " prefix (keep trailing content)
-            var content = raw.Length > 4 && raw[3] == ' '
+            string content = raw.Length > 4 && raw[3] == ' '
                 ? raw[4..]
                 : raw[3..];
 
@@ -219,8 +219,10 @@ public static class RegexExplainer
                 if (content.TrimEnd() == "<code>"
                     && i > 0
                     && lines[i - 1].TrimStart().TrimStart('/').Trim()
-                        .StartsWith("Explanation:", StringComparison.OrdinalIgnoreCase))
+                                   .StartsWith("Explanation:", StringComparison.OrdinalIgnoreCase))
+                {
                     inCode = true;
+                }
 
                 continue;
             }
@@ -232,10 +234,10 @@ public static class RegexExplainer
             }
 
             // Strip trailing <br/> and whitespace
-            var text = content
-                .Replace("<br/>", "")
-                .Replace("<br />", "")
-                .TrimEnd();
+            string text = content
+                          .Replace("<br/>", "")
+                          .Replace("<br />", "")
+                          .TrimEnd();
 
             if (string.IsNullOrEmpty(text))
             {
@@ -244,8 +246,8 @@ public static class RegexExplainer
 
             // Count leading spaces before the ○ bullet to determine indent level.
             // Generator uses 4-space indentation per level.
-            var leadingSpaces = text.Length - text.TrimStart().Length;
-            var indent = leadingSpaces / 4;
+            int leadingSpaces = text.Length - text.TrimStart().Length;
+            int indent = leadingSpaces / 4;
 
             result.Add(new ExplanationLine(text.TrimStart(), indent));
         }
@@ -260,26 +262,16 @@ public sealed class ExplanationResult
     public IReadOnlyList<ExplanationLine> Lines { get; private init; } = [];
     public string? ErrorMessage { get; private init; }
 
-    public static ExplanationResult Ok(List<ExplanationLine> lines)
-    {
-        return new ExplanationResult { IsOk = true, Lines = lines };
-    }
+    public static ExplanationResult Ok(List<ExplanationLine> lines) => new() { IsOk = true, Lines = lines };
 
-    public static ExplanationResult BuildFailed(string output)
-    {
-        return new ExplanationResult { IsOk = false, ErrorMessage = $"Build failed (invalid pattern?)\n{output}" };
-    }
+    public static ExplanationResult BuildFailed(string output) =>
+        new() { IsOk = false, ErrorMessage = $"Build failed (invalid pattern?)\n{output}" };
 
-    public static ExplanationResult NotFound()
-    {
-        return new ExplanationResult
-            { IsOk = false, ErrorMessage = "Source generator produced no explanation for this pattern." };
-    }
+    public static ExplanationResult NotFound() =>
+        new() { IsOk = false, ErrorMessage = "Source generator produced no explanation for this pattern." };
 
-    public static ExplanationResult Unexpected(Exception ex)
-    {
-        return new ExplanationResult { IsOk = false, ErrorMessage = $"Explanation unavailable: {ex.Message}" };
-    }
+    public static ExplanationResult Unexpected(Exception ex) =>
+        new() { IsOk = false, ErrorMessage = $"Explanation unavailable: {ex.Message}" };
 }
 
 public sealed record ExplanationLine(string Text, int IndentLevel);
